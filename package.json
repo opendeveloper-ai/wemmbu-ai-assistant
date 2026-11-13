@@ -1,0 +1,45 @@
+{
+  "name": "wemmbu-ai-assistant",
+  "private": true,
+  "version": "0.2.9",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n API,VITE -c blue,green \"node server/index.js\" \"vite --host 127.0.0.1\"",
+    "build": "vite build && node scripts/verify-dist-character-assets.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "api": "node server/index.js",
+    "dev:ui": "vite --host 127.0.0.1",
+    "test:memory": "node --test server/memoryStore.test.js server/memorySqliteStore.test.js server/memoryApi.test.js server/memoryEngine.test.js server/memoryTools.test.js server/memoryChatTools.test.js server/characterActions.test.js server/chatUiGearRegression.test.js",
+    "verify:stage5": "npm run test:memory && npm run build",
+    "benchmark:memory": "node scripts/benchmark-memory.js",
+    "verify:stage6": "npm run test:memory && npm run benchmark:memory && npm run build && npm run check:build-chunks",
+    "check:build-chunks": "node scripts/check-build-chunks.js",
+    "verify:stage7": "npm run test:memory && npm run build && npm run check:build-chunks",
+    "verify:stage9": "npm run test:memory && npm run build && npm run check:build-chunks",
+    "verify:stage10": "npm run test:memory && npm run build && npm run check:build-chunks",
+    "tauri:prepare": "node scripts/prepare-tauri-resources.mjs",
+    "tauri:dev": "npm run tauri:prepare && cargo tauri dev",
+    "tauri:build:windows": "node scripts/prepare-tauri-resources.mjs --windows && cargo tauri build --bundles nsis",
+    "dev:ui:tauri": "vite --host 127.0.0.1 --port 1420 --strictPort",
+    "test:desktop": "node --test src/api.test.js server/httpCors.test.js server/settingsCors.integration.test.js",
+    "test:assets": "node --test server/avatarAsset.test.js server/equipmentDesktopRegression.test.js",
+    "test:all": "npm run test:memory && npm run test:desktop && npm run test:assets && npm run test:voice && npm run test:release",
+    "test:voice": "node --test src/speechPlaybackQueue.test.js src/speechIntegration.test.js",
+    "verify:release": "npm run test:all && npm run build",
+    "test:release": "node --test server/publicRelease.test.js"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.171.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "vite": "^6.0.5"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  }
+}

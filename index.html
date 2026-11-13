@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f9fc" />
+    <meta name="description" content="A Minecraft-inspired AI companion with an interactive 3D character, chat, voice, gestures, and equipment controls." />
+    <title>Wemmbu AI Assistant</title>
+  </head>
+  <body>
+    <div id="root">
+      <div id="boot-fallback" style="min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#eef2f8;color:#18233c;font:15px/1.5 system-ui,sans-serif">
+        <div style="max-width:560px;padding:28px;background:white;border:1px solid #e1e8f2;border-radius:18px;box-shadow:0 12px 38px #263b5c12">
+          <h1 style="margin:0 0 8px;font-size:22px">Starting Wemmbu Assistant…</h1>
+          <p style="margin:0;color:#64748b">If this message stays here, the app did not finish loading. Run <b>start.bat</b> from the extracted project folder; do not open index.html directly.</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      (() => {
+        const showStartupError = (message) => {
+          const root = document.getElementById('root');
+          if (!root || root.querySelector('.app-shell')) return;
+          root.innerHTML = '';
+          const panel = document.createElement('div');
+          panel.style.cssText = 'min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#eef2f8;color:#18233c;font:14px/1.55 system-ui,sans-serif';
+          const card = document.createElement('div');
+          card.style.cssText = 'max-width:640px;width:100%;padding:26px;background:white;border:1px solid #e1e8f2;border-radius:18px;box-shadow:0 12px 38px #263b5c12';
+          const heading = document.createElement('h1');
+          heading.textContent = 'Wemmbu Assistant could not start';
+          heading.style.cssText = 'margin:0 0 10px;font-size:22px';
+          const explanation = document.createElement('p');
+          explanation.textContent = 'A JavaScript startup error stopped the interface from loading. Copy the error below and send it to your developer.';
+          const details = document.createElement('pre');
+          details.textContent = String(message || 'Unknown startup error');
+          details.style.cssText = 'white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#f5f7fb;border-radius:10px;color:#b42318;font:12px/1.5 ui-monospace,monospace';
+          const help = document.createElement('p');
+          help.textContent = 'Launch with start.bat or run npm install followed by npm run dev in the project folder. Do not open index.html directly.';
+          card.append(heading, explanation, details, help);
+          panel.append(card);
+          root.append(panel);
+        };
+        window.addEventListener('error', (event) => showStartupError(event.message || event.error || 'JavaScript error'));
+        window.addEventListener('unhandledrejection', (event) => showStartupError(event.reason?.stack || event.reason || 'Unhandled promise rejection'));
+      })();
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

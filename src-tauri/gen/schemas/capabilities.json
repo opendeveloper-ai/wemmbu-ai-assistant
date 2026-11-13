@@ -1,0 +1,1 @@
+{"main-capability":{"identifier":"main-capability","description":"Main Wemmbu desktop window with the approved external HTTPS link opener.","local":true,"windows":["main"],"permissions":["core:default","opener:allow-default-urls"]}}
