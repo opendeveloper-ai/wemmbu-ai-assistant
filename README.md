@@ -1,44 +1,61 @@
-Wemmbu AI Assistant
+# Wemmbu AI Assistant
+
 A Windows desktop AI companion built with React, Three.js, Node.js and Tauri 2. The app combines an animated 3D character with AI chat, voice output, character actions, equipment, image generation and local persistent memory.
-Unofficial fan project. This is an independently developed project. It is not affiliated with, endorsed by, sponsored by, or operated by Wemmbu, the Unstable SMP, Mojang Studios or Microsoft. It does not represent or speak for the person whose character is depicted.
 
-Project status
-Item	Current implementation
-Application version	0.2.9
-Frontend	React 18 + Vite
-3D scene	Three.js + GLTFLoader
-Local backend	Node.js HTTP API
-Desktop host	Tauri 2 + Rust
-Windows web runtime	WebView2
-Required Node.js for development/build	24.15.0 or newer
+> **Unofficial fan project.** This is an independently developed project. It is not affiliated with, endorsed by, sponsored by, or operated by Wemmbu, the Unstable SMP, Mojang Studios or Microsoft. It does not represent or speak for the person whose character is depicted.
 
+## Project status
+
+| Item | Current implementation |
+|---|---|
+| Application version | `0.2.9` |
+| Frontend | React 18 + Vite |
+| 3D scene | Three.js + GLTFLoader |
+| Local backend | Node.js HTTP API |
+| Desktop host | Tauri 2 + Rust |
+| Windows web runtime | WebView2 |
+| Required Node.js for development/build | `24.15.0` or newer |
 
 The repository contains the application source and Windows installer build workflow. A local development run, a frontend production build and a packaged Windows installer are three different checks; run the relevant commands below on the machine you intend to use for development or release.
-What the application does
-3D character and actions
+
+## What the application does
+
+### 3D character and actions
+
 - Renders the character and equipment models in a Three.js scene.
 - Supports character rotation and camera elevation controls.
 - Includes gestures such as Wave, Explain, Nod/Agree, Shake Head, Think, Point, Present, Shrug, Cheer, Salute, Facepalm and Stop/Wait.
 - Uses a shared action registry for UI actions, local parsing and AI tool definitions.
 - Supports armor overlays and held equipment, including a mace and Totem of Undying.
-AI chat and integrations
+
+### AI chat and integrations
+
 - Sends chat requests through the local Node API to OpenRouter.
 - Exposes character-action and equipment controls to the assistant through local tools.
 - Stores chat sessions locally.
 - Supports optional web-search and image-generation flows where the configured provider and selected model support them.
-Voice
+
+### Voice
+
 - Integrates Fish Audio text-to-speech.
 - Provides browser/system speech fallback where available.
 - Queues speech in chunks and supports interruption.
 - Drives mouth animation from audio playback activity.
 - Uses browser speech recognition when supported by the environment.
+
 Fish Audio requires an API key and a voice/reference ID that you are permitted to use. The application does not ship with a creator-specific reference ID preconfigured.
-Persistent memory
+
+### Persistent memory
+
 - Creates, searches, updates, archives, restores and deletes local memories.
 - Uses SQLite-backed storage with migration, validation and backup support.
 - Makes relevant memory available to chat through memory tools.
-Architecture
+
+## Architecture
+
 The desktop app is not an Electron application. Tauri creates the native application window and hosts the React interface in WebView2. A local Node process provides the application API.
+
+```text
 Windows desktop window
 └─ Tauri 2 host (Rust: src-tauri/)
    ├─ WebView2
@@ -51,10 +68,15 @@ Windows desktop window
          ├─ Google AI Studio image generation
          ├─ Settings and chat sessions
          └─ SQLite-backed memory
-The frontend calls the API at 127.0.0.1:8787. The API binds to loopback rather than acting as a public network server. In a packaged Windows build, Tauri starts a bundled Node.js runtime and the staged API files. Settings, chat sessions and memory are stored in the operating-system application-data directory. In a development run, project data is stored under data/ by default.
+```
+
+The frontend calls the API at `127.0.0.1:8787`. The API binds to loopback rather than acting as a public network server. In a packaged Windows build, Tauri starts a bundled Node.js runtime and the staged API files. Settings, chat sessions and memory are stored in the operating-system application-data directory. In a development run, project data is stored under `data/` by default.
 
 More detail: [Architecture overview](docs/ARCHITECTURE.md).
-Repository layout
+
+## Repository layout
+
+```text
 wemmbu-ai-assistant/
 ├── .github/
 │   └── workflows/
@@ -111,32 +133,55 @@ wemmbu-ai-assistant/
 ├── package-lock.json
 ├── vite.config.js
 └── start.bat                            # Windows development launcher
+```
+
 The tree shows the main areas, not every test, generated schema or asset file. Keep runtime data (credentials, sessions, databases and backups) out of commits.
-Development setup (Windows)
-Requirements
+
+## Development setup (Windows)
+
+### Requirements
+
 - Windows 10 or 11, x64.
 - Git.
-- Node.js 24.15.0 or newer, with npm.
+- Node.js `24.15.0` or newer, with npm.
 - WebView2 Runtime for the Tauri desktop shell. The Windows installer is configured to use the WebView2 bootstrapper for end-user installation.
+
 Rust, Visual Studio C++ Build Tools, NSIS and the Tauri CLI are needed only when building or running the native Tauri desktop application. See [Building the Windows desktop app](docs/INSTALLATION.md).
-Clone and install
+
+### Clone and install
+
 Open PowerShell and run:
+
+```powershell
 git clone https://github.com/opendeveloper-ai/wemmbu-ai-assistant.git
 cd wemmbu-ai-assistant
 node --version
 npm --version
 npm ci
-The Node.js version must satisfy the engines entry in package.json (>=24.15.0).
-Run the browser development app
-npm run dev
-This starts both services:
-- Vite frontend: http://127.0.0.1:1420
-- Local Node API: http://127.0.0.1:8787
-Leave the terminal running while using the app. Open the Vite address in a browser. You can also run start.bat from PowerShell or File Explorer on Windows; it checks Node.js, installs dependencies when needed and starts the development services.
+```
 
-Open Settings in the app to configure provider keys and model options. See [Provider configuration](docs/CONFIGURATION.md).
-Build and test
+The Node.js version must satisfy the `engines` entry in `package.json` (`>=24.15.0`).
+
+### Run the browser development app
+
+```powershell
+npm run dev
+```
+
+This starts both services:
+
+- Vite frontend: `http://127.0.0.1:1420`
+- Local Node API: `http://127.0.0.1:8787`
+
+Leave the terminal running while using the app. Open the Vite address in a browser. You can also run `start.bat` from PowerShell or File Explorer on Windows; it checks Node.js, installs dependencies when needed and starts the development services.
+
+Open **Settings** in the app to configure provider keys and model options. See [Provider configuration](docs/CONFIGURATION.md).
+
+## Build and test
+
 Run these from the repository root:
+
+```powershell
 # Production frontend build, including character asset verification
 npm run build
 
@@ -145,57 +190,91 @@ npm run test:all
 
 # Tests plus the production frontend build
 npm run verify:release
+```
+
 Useful focused checks:
+
+```powershell
 npm run test:memory
 npm run test:desktop
 npm run test:assets
 npm run test:voice
 npm run check:build-chunks
-The script definitions in package.json are the source of truth for available commands. See [Testing](docs/TESTING.md).
-Build the native Tauri window and Windows installer
+```
+
+The script definitions in `package.json` are the source of truth for available commands. See [Testing](docs/TESTING.md).
+
+## Build the native Tauri window and Windows installer
+
 The native window is created by Tauri, not by a separate React window component:
-- src-tauri/tauri.conf.json defines the main window, title, initial size (1440 × 920), minimum size (1024 × 700) and resize behaviour.
-- In development, Tauri starts Vite at http://127.0.0.1:1420 using devUrl and beforeDevCommand.
-- In a production build, Tauri loads the Vite output from dist/ (frontendDist).
-- src-tauri/src/main.rs starts the local Node API as a managed child process, waits for its health endpoint and stops it when the desktop app exits.
-- scripts/prepare-tauri-resources.mjs stages the API source and, for the Windows installer, the Node.js runtime under src-tauri/resources/.
+
+- `src-tauri/tauri.conf.json` defines the `main` window, title, initial size (`1440 × 920`), minimum size (`1024 × 700`) and resize behaviour.
+- In development, Tauri starts Vite at `http://127.0.0.1:1420` using `devUrl` and `beforeDevCommand`.
+- In a production build, Tauri loads the Vite output from `dist/` (`frontendDist`).
+- `src-tauri/src/main.rs` starts the local Node API as a managed child process, waits for its health endpoint and stops it when the desktop app exits.
+- `scripts/prepare-tauri-resources.mjs` stages the API source and, for the Windows installer, the Node.js runtime under `src-tauri/resources/`.
+
 For a native Tauri development window, install the desktop build prerequisites and run:
+
+```powershell
 npm ci
 npm run tauri:dev
+```
+
 For a Windows NSIS installer, install the Windows build prerequisites and run:
+
+```powershell
 npm ci
 npm run test:all
 npm run tauri:build:windows
+```
+
 The installer is written to:
+
+```text
 src-tauri/target/release/bundle/nsis/*-setup.exe
+```
+
 The installed app includes the Node runtime used by its local API, so end users do not need to install Node.js separately. The WebView2 bootstrapper is configured in the Tauri bundle settings. The installer is currently unsigned unless a code-signing setup is added.
 
-The complete prerequisites, resource-staging details and troubleshooting steps are in [INSTALLATION.md](docs/INSTALLATION.md) and [README-TAURI-INSTALLER.md](README-TAURI-INSTALLER.md).
-Provider configuration
-Provider credentials are entered in the application's Settings panel and stored by the local Node service.
-Integration	Used for	Required configuration
-OpenRouter	AI chat	API key and model ID
-Fish Audio	Text-to-speech	API key and permitted voice/reference ID
-Google AI Studio	Image generation	API key
+The complete prerequisites, resource-staging details and troubleshooting steps are in [docs/INSTALLATION.md](docs/INSTALLATION.md) and [README-TAURI-INSTALLER.md](README-TAURI-INSTALLER.md).
 
+## Provider configuration
+
+Provider credentials are entered in the application's **Settings** panel and stored by the local Node service.
+
+| Integration | Used for | Required configuration |
+|---|---|---|
+| OpenRouter | AI chat | API key and model ID |
+| Fish Audio | Text-to-speech | API key and permitted voice/reference ID |
+| Google AI Studio | Image generation | API key |
 
 Provider use may consume quota or incur charges. Review the provider's current pricing and terms. Chat prompts, speech text or image prompts are sent to the selected provider when those features are used; this application is not an offline-only AI client.
 
-See [CONFIGURATION.md](docs/CONFIGURATION.md) for setup and data-storage details.
-Local data and privacy
-- In development, the API uses data/ by default. Tauri sets the data directory to the operating-system application-data location.
+See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for setup and data-storage details.
+
+## Local data and privacy
+
+- In development, the API uses `data/` by default. Tauri sets the data directory to the operating-system application-data location.
 - Provider credentials, chat sessions, generated images and memory are local application data; they are not source files.
-- The API listens on 127.0.0.1:8787. It is intended for the local desktop app, not as a remotely accessible multi-user service.
+- The API listens on `127.0.0.1:8787`. It is intended for the local desktop app, not as a remotely accessible multi-user service.
 - Requests sent to OpenRouter, Fish Audio or Google AI Studio leave the computer and are subject to the provider's policies.
-- Do not commit data/settings.json, session exports, memory databases, memory backups, .env files, API keys or private logs.
+- Do not commit `data/settings.json`, session exports, memory databases, memory backups, `.env` files, API keys or private logs.
+
 Read [SECURITY.md](SECURITY.md) before reporting a security issue.
-Licence
-The original project code is distributed under the GNU General Public License, version 3.0. See LICENSE for the complete terms.
+
+## Licence
+
+The original project code is distributed under the **GNU General Public License, version 3.0**. See [`LICENSE`](LICENSE) for the complete terms.
 
 Third-party models, textures, images, libraries and other included materials may have their own licences and attribution requirements. The GPL licence for the project code does not replace or override the terms attached to those materials. Refer to [`THIRD_PARTY_ASSETS.md`](THIRD_PARTY_ASSETS.md) and preserve the applicable notices when using or redistributing them.
-Contributing
+
+## Contributing
+
 Bug reports, focused fixes, tests and documentation improvements are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
-Related documentation
+
+## Related documentation
+
 - [Installation and Windows desktop build](docs/INSTALLATION.md)
 - [Architecture overview](docs/ARCHITECTURE.md)
 - [Provider configuration](docs/CONFIGURATION.md)
