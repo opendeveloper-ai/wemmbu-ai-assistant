@@ -110,10 +110,16 @@ fn app_root_and_runtime<R: tauri::Runtime>(
             format!("Could not locate bundled server/index.js under resource directory {}", resource_dir.display()),
         ))?;
 
+    // Each release bundle carries the native Node executable for its target OS:
+    // node.exe on Windows and node on Linux/macOS.
+    let node_executable_name = if cfg!(target_os = "windows") { "node.exe" } else { "node" };
+    let runtime_relative_path = PathBuf::from("resources")
+        .join("runtime")
+        .join(node_executable_name);
     let runtime_candidates = [
-        app.path().resolve("resources/runtime/node.exe", BaseDirectory::Resource).ok(),
-        Some(resource_dir.join("resources").join("runtime").join("node.exe")),
-        Some(resource_dir.join("runtime").join("node.exe")),
+        app.path().resolve(&runtime_relative_path, BaseDirectory::Resource).ok(),
+        Some(resource_dir.join("resources").join("runtime").join(node_executable_name)),
+        Some(resource_dir.join("runtime").join(node_executable_name)),
     ];
     let node_program = runtime_candidates
         .into_iter()
@@ -121,7 +127,7 @@ fn app_root_and_runtime<R: tauri::Runtime>(
         .find(|candidate| candidate.is_file())
         .ok_or_else(|| std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            format!("Could not locate bundled runtime/node.exe under resource directory {}", resource_dir.display()),
+            format!("Could not locate bundled runtime/{node_executable_name} under resource directory {}", resource_dir.display()),
         ))?;
 
     append_log(log_path, &format!("Resolved API root: {}", app_root.display()));

@@ -89,7 +89,7 @@ The application is designed as a desktop experience: the React interface runs in
 | Windows web runtime | WebView2 |
 | Required Node.js for development/build | `24.15.0` or newer |
 
-The repository contains the application source and Windows installer build workflow. A local development run, a frontend production build and a packaged Windows installer are three different checks; run the relevant commands below on the machine you intend to use for development or release.
+The repository includes separate GitHub Actions workflows for Windows, Linux and macOS packaging. Windows uses the tested NSIS installer workflow; Linux and macOS installers are newly added CI targets and must complete their first hosted builds and platform-specific smoke tests before being treated as validated releases. A local development run, a frontend production build and a packaged desktop installer are separate checks.
 
 ## Features
 
@@ -153,7 +153,9 @@ More detail: [Architecture overview](docs/ARCHITECTURE.md).
 wemmbu-ai-assistant/
 ├── .github/
 │   └── workflows/
-│       └── windows-tauri-installer.yml   # Windows installer workflow
+│       ├── windows-tauri-installer.yml   # Windows NSIS installer workflow
+│       ├── linux-tauri-installers.yml    # Linux DEB and AppImage workflows
+│       └── macos-tauri-installers.yml    # macOS Apple Silicon and Intel DMGs
 ├── data/                                 # Local development data; not committed
 ├── docs/
 │   ├── media/
@@ -164,6 +166,7 @@ wemmbu-ai-assistant/
 │   │   └── settings.png                  # Settings screenshot
 │   ├── ARCHITECTURE.md                   # Runtime and component boundaries
 │   ├── CONFIGURATION.md                  # Provider setup and local data
+│   ├── CROSS_PLATFORM_BUILDS.md          # Linux/macOS CI builds and packaging notes
 │   ├── FUNDING.md                        # Funding setup notes
 │   ├── INSTALLATION.md                   # Development and Tauri build guide
 │   ├── LAUNCH.md                         # Community launch notes
@@ -198,7 +201,7 @@ wemmbu-ai-assistant/
 ├── src-tauri/
 │   ├── capabilities/                     # Tauri v2 permissions
 │   ├── gen/schemas/                      # Generated Tauri schemas
-│   ├── icons/                            # Windows application icons
+│   ├── icons/                            # Windows, macOS and Linux application icons
 │   ├── src/main.rs                       # Native app entry point and API process host
 │   ├── Cargo.toml                        # Rust/Tauri dependencies and release profile
 │   └── tauri.conf.json                   # Window, dev URL, frontend and bundle settings
@@ -291,7 +294,7 @@ The native window is created by Tauri, not by a separate React window component:
 - In development, Tauri starts Vite at `http://127.0.0.1:1420` using `devUrl` and `beforeDevCommand`.
 - In a production build, Tauri loads the Vite output from `dist/` (`frontendDist`).
 - `src-tauri/src/main.rs` starts the local Node API as a managed child process, waits for its health endpoint and stops it when the desktop app exits.
-- `scripts/prepare-tauri-resources.mjs` stages the API source and, for the Windows installer, the Node.js runtime under `src-tauri/resources/`.
+- `scripts/prepare-tauri-resources.mjs` stages the API source and the native Node.js runtime under `src-tauri/resources/` for the matching build OS (Windows, Linux or macOS).
 
 For a native Tauri development window, install the desktop build prerequisites and run:
 
@@ -316,7 +319,9 @@ src-tauri/target/release/bundle/nsis/*-setup.exe
 
 The installed app includes the Node runtime used by its local API, so end users do not need to install Node.js separately. The WebView2 bootstrapper is configured in the Tauri bundle settings. The installer is currently unsigned unless a code-signing setup is added.
 
-The complete prerequisites, resource-staging details and troubleshooting steps are in [docs/INSTALLATION.md](docs/INSTALLATION.md) and [README-TAURI-INSTALLER.md](README-TAURI-INSTALLER.md).
+The Windows NSIS wizard uses custom Wemmbu-branded header/sidebar artwork; the GPL-3.0 licence file is included in the platform bundles. Linux packages use the generated application icons, and the macOS DMG uses a custom branded background. See [cross-platform build and installer branding notes](docs/CROSS_PLATFORM_BUILDS.md).
+
+The complete Windows prerequisites and troubleshooting steps are in [docs/INSTALLATION.md](docs/INSTALLATION.md) and [README-TAURI-INSTALLER.md](README-TAURI-INSTALLER.md). The Linux/macOS hosted build targets, artifact names and macOS signing caveat are documented in [docs/CROSS_PLATFORM_BUILDS.md](docs/CROSS_PLATFORM_BUILDS.md).
 
 ## Provider configuration
 
@@ -342,7 +347,7 @@ See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for setup and data-storage de
 
 Read [SECURITY.md](SECURITY.md) before reporting a security issue.
 
-## License
+## Licence
 
 The original project code is distributed under the **GNU General Public License, version 3.0**. See [`LICENSE`](LICENSE) for the complete terms.
 
@@ -353,6 +358,7 @@ Third-party models, textures, images, libraries and other included materials may
 Bug reports, focused fixes, tests and documentation improvements are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## Related documentation
+- [Cross-platform desktop build workflows](docs/CROSS_PLATFORM_BUILDS.md)
 
 - [Installation and Windows desktop build](docs/INSTALLATION.md)
 - [Architecture overview](docs/ARCHITECTURE.md)
