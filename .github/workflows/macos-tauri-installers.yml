@@ -1,0 +1,60 @@
+name: Build Wemmbu macOS DMG installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos-installers:
+    name: macOS ${{ matrix.arch }} (.dmg)
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-26
+            arch: arm64
+            rust_target: aarch64-apple-darwin
+          - runner: macos-26-intel
+            arch: x64
+            rust_target: x86_64-apple-darwin
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: npm
+
+      - name: Set up stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version 2.12.4 --locked
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run full regression and release-readiness tests
+        run: npm run test:all
+
+      - name: Build macOS DMG installer
+        run: npm run tauri:build:macos
+
+      - name: Upload macOS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wemmbu-AI-Assistant-macOS-${{ matrix.arch }}-DMG
+          path: src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 30
