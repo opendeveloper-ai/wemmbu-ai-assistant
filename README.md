@@ -342,7 +342,7 @@ See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for setup and data-storage de
 
 Read [SECURITY.md](SECURITY.md) before reporting a security issue.
 
-## Licence
+## License
 
 The original project code is distributed under the **GNU General Public License, version 3.0**. See [`LICENSE`](LICENSE) for the complete terms.
 
