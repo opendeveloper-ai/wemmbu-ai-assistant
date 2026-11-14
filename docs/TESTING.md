@@ -44,3 +44,14 @@ Install the generated NSIS package on a clean Windows test account and verify:
 - Light/dark theme and chat resizing.
 
 Do not label a release as Windows-verified until the installed package has been launched and these checks have been completed.
+
+
+## Cross-platform development launcher checks
+
+The shared launcher has unit coverage for the Node.js minimum version check, reuse of a healthy API, default-port selection, fallback-port selection and the no-free-port error path. Run those tests with:
+
+```bash
+node --test scripts/start-dev.test.mjs
+```
+
+On each target operating system, also smoke-test its entry point: `start.bat` on Windows, `./start.sh` on Linux, and `./start.command` on macOS. Verify that the terminal reports the frontend URL, that the API health endpoint responds, and that `Ctrl+C` stops the development processes.

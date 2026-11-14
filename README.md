@@ -3,7 +3,7 @@
 
   <h1>Wemmbu AI Assistant</h1>
 
-  <p>A Windows desktop AI companion featuring an interactive 3D character, AI chat, voice, character actions, equipment and persistent local memory.</p>
+  <p>A cross-platform desktop AI companion featuring an interactive 3D character, AI chat, voice, character actions, equipment and persistent local memory.</p>
 
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-2F81F7?style=for-the-badge&logo=gnu&logoColor=white" alt="GNU General Public License v3.0"></a>
@@ -12,7 +12,7 @@
   </p>
   <p>
     <img src="https://img.shields.io/badge/Version-0.2.9-2F81F7?style=for-the-badge" alt="Version 0.2.9">
-    <img src="https://img.shields.io/badge/Platform-Windows-2F81F7?style=for-the-badge&logo=windows&logoColor=white" alt="Windows platform">
+    <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-2F81F7?style=for-the-badge&logo=windows&logoColor=white" alt="Windows, Linux and macOS build targets">
     <img src="https://img.shields.io/badge/Desktop-Tauri%202-2F81F7?style=for-the-badge&logo=tauri&logoColor=white" alt="Tauri 2 desktop app">
     <img src="https://img.shields.io/badge/Frontend-React%2018-2F81F7?style=for-the-badge&logo=react&logoColor=white" alt="React 18 frontend">
     <img src="https://img.shields.io/badge/3D-Three.js-2F81F7?style=for-the-badge&logo=threedotjs&logoColor=white" alt="Three.js 3D scene">
@@ -61,9 +61,9 @@ The screenshots below show the application's current interface. Select any image
     - [Persistent memory](#persistent-memory)
   - [Architecture](#architecture)
   - [Repository layout](#repository-layout)
-  - [Development setup (Windows)](#development-setup-windows)
+  - [Development setup (Windows, Linux and macOS)](#development-setup-windows-linux-and-macos)
   - [Build and test](#build-and-test)
-  - [Build the native Tauri window and Windows installer](#build-the-native-tauri-window-and-windows-installer)
+  - [Build the native Tauri desktop app and platform installers](#build-the-native-tauri-desktop-app-and-platform-installers)
   - [Provider configuration](#provider-configuration)
   - [Local data and privacy](#local-data-and-privacy)
   - [Licence](#licence)
@@ -73,7 +73,7 @@ The screenshots below show the application's current interface. Select any image
 
 ## Overview
 
-Wemmbu AI Assistant is a Windows desktop AI companion built with **React, Three.js, Node.js and Tauri 2**. It combines an animated 3D character with AI chat, voice output, character actions, equipment interactions, image generation and persistent local memory.
+Wemmbu AI Assistant is a cross-platform desktop AI companion built with **React, Three.js, Node.js and Tauri 2**. It combines an animated 3D character with AI chat, voice output, character actions, equipment interactions, image generation and persistent local memory.
 
 The application is designed as a desktop experience: the React interface runs inside the Tauri window, while a local Node.js service handles provider integrations, application data and memory.
 
@@ -86,7 +86,7 @@ The application is designed as a desktop experience: the React interface runs in
 | 3D scene | Three.js + GLTFLoader |
 | Local backend | Node.js HTTP API |
 | Desktop host | Tauri 2 + Rust |
-| Windows web runtime | WebView2 |
+| Platform webview | WebView2 (Windows), WebKitGTK (Linux), WKWebView (macOS) |
 | Required Node.js for development/build | `24.15.0` or newer |
 
 The repository includes separate GitHub Actions workflows for Windows, Linux and macOS packaging. Windows uses the tested NSIS installer workflow; Linux and macOS installers are newly added CI targets and must complete their first hosted builds and platform-specific smoke tests before being treated as validated releases. A local development run, a frontend production build and a packaged desktop installer are separate checks.
@@ -129,9 +129,9 @@ Fish Audio requires an API key and a voice/reference ID that you are permitted t
 The desktop app is **not** an Electron application. Tauri creates the native application window and hosts the React interface in WebView2. A local Node process provides the application API.
 
 ```text
-Windows desktop window
+Desktop window
 └── Tauri 2 host (Rust: src-tauri/)
-    ├── WebView2
+    ├── Platform-native webview (WebView2 / WebKitGTK / WKWebView)
     │   └── React + Vite frontend (src/ and public/)
     │       └── Three.js character scene and GLB assets
     └── Managed Node.js child process
@@ -143,7 +143,7 @@ Windows desktop window
             └── SQLite-backed memory
 ```
 
-The frontend calls the API at `127.0.0.1:8787`. The API binds to loopback rather than acting as a public network server. In a packaged Windows build, Tauri starts a bundled Node.js runtime and the staged API files. Settings, chat sessions and memory are stored in the operating-system application-data directory. In a development run, project data is stored under `data/` by default.
+The frontend calls the API at `127.0.0.1:8787`. The API binds to loopback rather than acting as a public network server. In a packaged desktop build, Tauri starts the platform-native bundled Node.js runtime and the staged API files. Settings, chat sessions and memory are stored in the operating-system application-data directory. In a development run, project data is stored under `data/` by default.
 
 More detail: [Architecture overview](docs/ARCHITECTURE.md).
 
@@ -177,7 +177,9 @@ wemmbu-ai-assistant/
 ├── public/
 │   ├── assets/                           # Static images and public assets
 │   └── models/                           # Character, armour and item models/textures
-├── scripts/                              # Build preparation, asset checks and diagnostics
+├── scripts/                              # Build preparation, dev launcher, asset checks and diagnostics
+│   ├── start-dev.mjs                     # Shared cross-platform development launcher
+│   └── start-dev.test.mjs                # Development launcher tests
 ├── server/
 │   ├── index.js                          # Local HTTP API and provider routes
 │   ├── httpCors.js                       # Local-origin/CORS checks
@@ -214,56 +216,72 @@ wemmbu-ai-assistant/
 ├── package.json                         # npm scripts and dependency definitions
 ├── package-lock.json
 ├── vite.config.js
-└── start.bat                             # Windows development launcher
+├── start.bat                             # Windows development launcher
+├── start.sh                              # Linux/macOS terminal launcher
+└── start.command                         # macOS Finder/Terminal launcher
 ```
 
 The tree shows the main areas, not every test, generated schema or asset file. Keep runtime data (credentials, sessions, databases and backups) out of commits.
 
-## Development setup (Windows)
+## Development setup (Windows, Linux and macOS)
 
 ### Requirements
 
-- Windows 10 or 11, x64.
+- Windows 10/11, a supported Linux desktop distribution, or macOS.
 - Git.
-- Node.js `24.15.0` or newer, with npm.
-- WebView2 Runtime for the Tauri desktop shell. The Windows installer is configured to use the WebView2 bootstrapper for end-user installation.
+- Node.js `24.15.0` or newer, with npm included.
+- A working internet connection for the first dependency installation.
 
-Rust, Visual Studio C++ Build Tools, NSIS and the Tauri CLI are needed only when building or running the native Tauri desktop application. See [Building the Windows desktop app](docs/INSTALLATION.md).
+Rust, the Tauri CLI and platform webview development packages are **not** required to run the browser-based development app. They are required only when launching or building the native Tauri desktop shell; see [Installation and native desktop builds](docs/INSTALLATION.md).
 
-### Clone and install
+### Clone the repository
 
-Open PowerShell and run:
-
-```powershell
+```bash
 git clone https://github.com/opendeveloper-ai/wemmbu-ai-assistant.git
 cd wemmbu-ai-assistant
 node --version
 npm --version
-npm ci
 ```
 
-The Node.js version must satisfy the `engines` entry in `package.json` (`>=24.15.0`).
+The Node.js version must satisfy the `engines` entry in `package.json` (`>=24.15.0`). The platform launchers install the locked npm dependencies automatically on first run. You can also install them manually with `npm ci`.
 
-### Run the browser development app
+### Start with the platform launcher
 
-```powershell
+| Platform | Launcher | How to run |
+|---|---|---|
+| Windows | `start.bat` | Double-click it or run `./start.bat` in PowerShell. |
+| Linux | `start.sh` | Run `chmod +x ./start.sh` once, then `./start.sh`. Alternatively, use `bash ./start.sh`. |
+| macOS | `start.command` | Run `chmod +x ./start.command` once, then `./start.command`; you can also double-click it in Finder to open it in Terminal. Alternatively, use `bash ./start.command`. |
+
+All three launchers use the same `scripts/start-dev.mjs` startup routine. It checks the Node.js version, installs dependencies when needed, checks whether a Wemmbu API is already healthy on port `8787`, selects an available fallback API port (`8788`–`8827`) if another application owns the default port, and starts the frontend and API without intentionally launching a duplicate API process. Keep the terminal open while using the app; press `Ctrl+C` to stop it.
+
+On macOS, the first launch of a downloaded or untrusted `.command` file may be restricted by macOS security settings. Prefer cloning the repository from GitHub and launching it from Terminal; do not bypass macOS security prompts for files whose source you cannot verify.
+
+### Open the development app
+
+The launcher starts:
+
+- Vite frontend: [http://127.0.0.1:1420](http://127.0.0.1:1420)
+- Local Node API: `http://127.0.0.1:8787` (or the fallback port reported in the terminal)
+
+Open the frontend address in your browser. The launcher does not automatically open a browser window. Configure provider keys and model options in **Settings**; see [Provider configuration](docs/CONFIGURATION.md).
+
+### Start manually with npm
+
+The same development services can be started on any platform with:
+
+```bash
+npm ci       # first run, or after a clean checkout
 npm run dev
 ```
 
-This starts both services:
-
-- Vite frontend: [http://127.0.0.1:1420](http://127.0.0.1:1420)
-- Local Node API: `http://127.0.0.1:8787`
-
-Leave the terminal running while using the app. Open the Vite address in a browser. You can also run `start.bat` from PowerShell or File Explorer on Windows; it checks Node.js, installs dependencies when needed and starts the development services.
-
-Open **Settings** in the app to configure provider keys and model options. See [Provider configuration](docs/CONFIGURATION.md).
+`npm run dev` starts the API and Vite directly. Use `npm run start` or the operating-system launcher for the guided startup checks, first-run dependency installation and API-port collision handling.
 
 ## Build and test
 
 Run these from the repository root:
 
-```powershell
+```bash
 # Production frontend build, including character asset verification
 npm run build
 
@@ -276,7 +294,7 @@ npm run verify:release
 
 Useful focused checks:
 
-```powershell
+```bash
 npm run test:memory
 npm run test:desktop
 npm run test:assets
@@ -286,7 +304,7 @@ npm run check:build-chunks
 
 The script definitions in `package.json` are the source of truth for available commands. See [Testing](docs/TESTING.md).
 
-## Build the native Tauri window and Windows installer
+## Build the native Tauri desktop app and platform installers
 
 The native window is created by Tauri, not by a separate React window component:
 
@@ -321,7 +339,7 @@ The installed app includes the Node runtime used by its local API, so end users 
 
 The Windows NSIS wizard uses custom Wemmbu-branded header/sidebar artwork; the GPL-3.0 licence file is included in the platform bundles. Linux packages use the generated application icons, and the macOS DMG uses a custom branded background. See [cross-platform build and installer branding notes](docs/CROSS_PLATFORM_BUILDS.md).
 
-The complete Windows prerequisites and troubleshooting steps are in [docs/INSTALLATION.md](docs/INSTALLATION.md) and [README-TAURI-INSTALLER.md](README-TAURI-INSTALLER.md). The Linux/macOS hosted build targets, artifact names and macOS signing caveat are documented in [docs/CROSS_PLATFORM_BUILDS.md](docs/CROSS_PLATFORM_BUILDS.md).
+Platform prerequisites and troubleshooting steps are in [docs/INSTALLATION.md](docs/INSTALLATION.md) and [README-TAURI-INSTALLER.md](README-TAURI-INSTALLER.md). The Linux/macOS hosted build targets, artifact names and macOS signing caveat are documented in [docs/CROSS_PLATFORM_BUILDS.md](docs/CROSS_PLATFORM_BUILDS.md).
 
 ## Provider configuration
 

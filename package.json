@@ -28,7 +28,8 @@
     "test:all": "npm run test:memory && npm run test:desktop && npm run test:assets && npm run test:voice && npm run test:release",
     "verify:release": "npm run test:all && npm run build",
     "test:voice": "node --test src/speechPlaybackQueue.test.js src/speechIntegration.test.js",
-    "test:release": "node --test server/publicRelease.test.js"
+    "test:release": "node --test server/publicRelease.test.js scripts/start-dev.test.mjs",
+    "start": "node scripts/start-dev.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

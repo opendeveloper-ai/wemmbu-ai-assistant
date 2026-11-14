@@ -2,6 +2,16 @@
 
 The repository builds native installers on GitHub-hosted runners. A Windows development PC is sufficient to trigger and download the Linux/macOS build artifacts.
 
+## Local development launchers
+
+The browser-based development app has a launcher for each desktop operating system:
+
+- Windows: `start.bat`
+- Linux: `start.sh` (run `chmod +x ./start.sh` once, then `./start.sh`; `bash ./start.sh` also works)
+- macOS: `start.command` (run `chmod +x ./start.command` once, then `./start.command`; it can also be double-clicked in Finder to open Terminal)
+
+All three delegate to `scripts/start-dev.mjs`. The shared launcher checks Node.js 24.15.0+, installs npm dependencies when needed, reuses an existing healthy Wemmbu API, selects a fallback API port when the default is occupied, and starts the Vite browser frontend plus the local API. Open `http://127.0.0.1:1420` in a browser. These are development launchers; they do not start the native Tauri window. See [Installation](INSTALLATION.md) for full platform instructions.
+
 ## Workflows
 
 - `.github/workflows/windows-tauri-installer.yml`: Windows x64 NSIS `.exe`.
