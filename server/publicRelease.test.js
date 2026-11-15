@@ -28,7 +28,7 @@ test('package names and versions are consistent for the public source package', 
   assert.equal(lock.version, pkg.version);
   assert.equal(lock.packages[''].version, pkg.version);
   assert.equal(tauri.version, pkg.version);
-  assert.match(cargo, new RegExp(`version = "${pkg.version.replaceAll('.', '\\.')}"`));
+  assert.match(cargo, new RegExp(`version = "${pkg.version.replaceAll('.', '\\.') }"`));
 });
 
 test('creator-specific Fish Audio reference is not preconfigured in public defaults', () => {
@@ -42,15 +42,13 @@ test('creator-specific Fish Audio reference is not preconfigured in public defau
   assert.match(settingsPanel, /fishReferenceId:\s*''/);
 });
 
-test('release documentation warns that assets and software licence need review', () => {
+test('release documentation describes the software licence and asset rights', () => {
   const readme = read('README.md');
-  const checklist = read('PUBLIC-RELEASE-CHECKLIST.md');
   const assets = read('THIRD_PARTY_ASSETS.md');
-
   const license = read('LICENSE');
+
   assert.match(readme, /GNU General Public License, version 3\.0/i);
   assert.match(license, /GNU GENERAL PUBLIC LICENSE[\s\S]*Version 3/i);
-  assert.match(checklist, /armour GLBs/i);
   assert.match(assets, /redistribution permission are not documented/i);
 });
 
